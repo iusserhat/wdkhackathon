@@ -559,18 +559,26 @@ export default function TransactionModal({ account, onClose }) {
                 {/* Risk Analizi */}
                 {verificationData.analysis && (
                   <div className={styles.analysisBox}>
-                    <strong>Risk Analizi</strong>
+                    <strong>RİSK ANALİZİ ({verificationData.analysis.source === 'gemini' ? '🤖 AI' : verificationData.analysis.source === 'advanced_fallback' ? '🛡️ Gelişmiş' : '📊 Sistem'})</strong>
                     <div className={styles.analysisGrid}>
                       <span>Risk Skoru:</span>
-                      <span className={styles.riskScore}>
-                        {verificationData.analysis.totalRiskScore}/100
+                      <span className={styles.riskScore} style={{color: verificationData.analysis.riskScore >= 70 ? '#ef4444' : verificationData.analysis.riskScore >= 50 ? '#f59e0b' : '#22c55e'}}>
+                        {verificationData.analysis.riskScore}/100
                       </span>
                       <span>Süre:</span>
                       <span>
-                        {verificationData.analysis.timingDetails?.durationSeconds}s 
-                        (normal: {verificationData.analysis.timingDetails?.averageDuration}s)
+                        {verificationData.analysis.duration}s 
+                        (normal: {verificationData.analysis.averageDuration?.toFixed(0) || 120}s)
                       </span>
                     </div>
+                    {verificationData.analysis.reasons?.length > 0 && (
+                      <div className={styles.reasonsList}>
+                        <strong style={{marginTop: '10px', display: 'block'}}>⚠️ Tespit Edilen Riskler:</strong>
+                        {verificationData.analysis.reasons.map((reason, i) => (
+                          <span key={i} style={{display: 'block', padding: '4px 0', fontSize: '0.85rem'}}>• {reason}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

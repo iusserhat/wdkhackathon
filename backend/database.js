@@ -310,7 +310,7 @@ export function getUserProfile(sessionId) {
   const profile = getOrCreateProfile(sessionId);
   const stats = getTransactionStats(sessionId);
   const knownAddresses = getKnownAddressCount(sessionId);
-  const recentTx = getTransactionHistory(sessionId, 5);
+  const recentTx = getTransactionHistory(sessionId, 10); // Son 10 işlem
   
   return {
     sessionId,
@@ -319,6 +319,7 @@ export function getUserProfile(sessionId) {
     createdAt: profile.created_at,
     lastActivity: profile.last_activity,
     averageDuration: profile.average_duration || stats.avg_duration || 120,
+    averageAmount: stats.avg_amount || 0, // Ortalama miktar
     totalTransactions: profile.total_transactions,
     knownAddresses,
     stats: {

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import WDK from '@tetherto/wdk';
 import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
 import WalletManagerBtc from '@tetherto/wdk-wallet-btc';
@@ -974,6 +975,16 @@ app.post('/api/wallet/import', (req, res) => {
       accounts: new Map(),
       createdAt: new Date()
     });
+    
+    // 🔐 Cüzdan hash'i ile kayıtlı e-postayı bul ve yeni session'a aktar
+    const walletHash = crypto.createHash('sha256').update(seedPhrase).digest('hex');
+    const savedEmail = db.getWalletEmail(walletHash);
+    
+    if (savedEmail) {
+      db.getOrCreateProfile(sessionId);
+      db.updateUserEmail(sessionId, savedEmail);
+      console.log(`📧 Email restored from wallet hash: ${savedEmail}`);
+    }
     
     console.log(`✅ Wallet imported: ${sessionId}`);
     
@@ -2318,10 +2329,15 @@ app.post('/api/security/email/register', (req, res) => {
   try {
     const { sessionId, email } = req.body;
     
+    console.log(`📧 Email register request: sessionId=${sessionId}, email=${email}`);
+    
     const session = getWalletSession(sessionId);
     if (!session) {
+      console.log(`❌ Session not found: ${sessionId}`);
       return res.status(401).json({ success: false, error: 'Geçersiz oturum' });
     }
+    
+    console.log(`✅ Session found, hasSeedPhrase=${!!session.seedPhrase}`);
     
     // E-posta validasyonu
     if (!email || !isValidEmail(email)) {
@@ -2331,12 +2347,15 @@ app.post('/api/security/email/register', (req, res) => {
     // Session'a kaydet
     db.getOrCreateProfile(sessionId);
     db.updateUserEmail(sessionId, email);
+    console.log(`✅ Email saved to session profile`);
     
     // 🔐 Cüzdan hash'i ile de kaydet (kalıcı eşleme)
     if (session.seedPhrase) {
-      const crypto = require('crypto');
       const walletHash = crypto.createHash('sha256').update(session.seedPhrase).digest('hex');
       db.registerWalletEmail(walletHash, email);
+      console.log(`✅ Email saved to wallet_emails: hash=${walletHash.slice(0, 16)}...`);
+    } else {
+      console.log(`⚠️ No seedPhrase in session, skipping wallet_emails`);
     }
     
     console.log(`📧 Email registered for ${sessionId}: ${email}`);
@@ -2546,7 +2565,6 @@ app.post('/api/security/pre-sign', async (req, res) => {
       
       // Session'da yoksa wallet hash ile ara
       if (!userEmail && session.seedPhrase) {
-        const crypto = require('crypto');
         const walletHash = crypto.createHash('sha256').update(session.seedPhrase).digest('hex');
         userEmail = db.getWalletEmail(walletHash);
         
