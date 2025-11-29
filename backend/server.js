@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import WDK from '@tetherto/wdk';
@@ -5,12 +6,21 @@ import WalletManagerEvm from '@tetherto/wdk-wallet-evm';
 import WalletManagerBtc from '@tetherto/wdk-wallet-btc';
 import WalletManagerTron from '@tetherto/wdk-wallet-tron';
 
+// 🔐 Güvenlik Modülleri
+import * as db from './database.js';
+import { initGemini, analyzeUserBehavior, calculateNewAverage } from './geminiAnalyzer.js';
+import { initEmailService, sendVerificationEmail, isValidEmail } from './emailService.js';
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// 🔐 Servisleri başlat
+initGemini(process.env.GEMINI_API_KEY);
+initEmailService();
 
 // In-memory wallet storage (production'da database kullanılmalı)
 const walletSessions = new Map();
@@ -2083,43 +2093,30 @@ app.get('/api/security/profile/:sessionId', (req, res) => {
       return res.status(401).json({ success: false, error: 'Geçersiz oturum' });
     }
     
-    const behavior = userBehaviorData.get(sessionId);
-    
-    if (!behavior) {
-      return res.json({
-        success: true,
-        profile: {
-          sessionId,
-          status: 'new',
-          message: 'Henüz davranış verisi yok',
-          transactionCount: 0,
-          knownAddresses: 0,
-          averageAmount: 0,
-          stdDeviation: 0
-        }
-      });
-    }
-    
-    const stats = calculateStatistics(behavior.transactionHistory);
+    // SQLite'dan profil al
+    const profile = db.getUserProfile(sessionId);
     
     res.json({
       success: true,
       profile: {
         sessionId,
-        status: 'active',
-        createdAt: behavior.createdAt,
-        lastActivityTime: behavior.lastActivityTime,
-        transactionCount: behavior.totalTransactions,
-        knownAddresses: behavior.interactedAddresses.size,
-        averageAmount: stats.mean.toFixed(8),
-        stdDeviation: stats.stdDev.toFixed(8),
-        minTransaction: stats.min.toFixed(8),
-        maxTransaction: stats.max.toFixed(8),
-        recentTransactions: behavior.transactionHistory.slice(-5).map(tx => ({
+        status: profile.totalTransactions > 0 ? 'active' : 'new',
+        email: profile.email ? profile.email.replace(/(.{3}).*@/, '$1***@') : null,
+        emailVerified: profile.emailVerified,
+        createdAt: profile.createdAt,
+        lastActivity: profile.lastActivity,
+        transactionCount: profile.totalTransactions,
+        knownAddresses: profile.knownAddresses,
+        averageDuration: profile.averageDuration,
+        averageAmount: profile.stats.avgAmount?.toFixed(8) || '0',
+        stdDeviation: profile.stats.stdDeviation?.toFixed(2) || '0',
+        recentTransactions: profile.recentTransactions.map(tx => ({
           amount: tx.amount,
-          to: `${tx.to.slice(0, 8)}...${tx.to.slice(-6)}`,
+          to: tx.to ? `${tx.to.slice(0, 8)}...${tx.to.slice(-6)}` : 'N/A',
           type: tx.type,
           token: tx.token,
+          duration: tx.duration,
+          riskScore: tx.riskScore,
           timestamp: tx.timestamp
         }))
       }
@@ -2221,22 +2218,58 @@ app.post('/api/security/modal/interaction', (req, res) => {
 // Modal kapandığında veya işlem tamamlandığında
 app.post('/api/security/modal/end', (req, res) => {
   try {
-    const { sessionId, modalType = 'transfer', wasSuccessful = true } = req.body;
+    const { sessionId, modalType = 'transfer', wasSuccessful = true, txData = {} } = req.body;
     
-    const result = endModalSession(sessionId, modalType, wasSuccessful);
+    const sessionKey = `${sessionId}-${modalType}`;
+    const modalSession = activeModalSessions.get(sessionKey);
     
-    if (!result) {
+    if (!modalSession) {
       return res.status(404).json({ success: false, error: 'Modal oturumu bulunamadı' });
     }
     
-    const behavior = userBehaviorData.get(sessionId);
+    const duration = Math.round((Date.now() - modalSession.startTime) / 1000);
+    const interactions = modalSession.interactionCount;
+    
+    // Modal'ı temizle
+    activeModalSessions.delete(sessionKey);
+    
+    // Başarılı işlemleri SQLite'a kaydet
+    if (wasSuccessful && txData.amount && txData.to) {
+      // İşlemi kaydet
+      db.recordTransaction(sessionId, {
+        type: modalType,
+        amount: parseFloat(txData.amount),
+        to: txData.to,
+        token: txData.token || 'ETH',
+        duration,
+        interactions,
+        riskScore: txData.riskScore || 0
+      });
+      
+      // Adresi bilinen adreslere ekle
+      db.addKnownAddress(sessionId, txData.to);
+      
+      // Ortalama süreyi güncelle
+      const profile = db.getUserProfile(sessionId);
+      const newAverage = calculateNewAverage(
+        profile.averageDuration, 
+        duration, 
+        profile.totalTransactions
+      );
+      db.updateAverageDuration(sessionId, newAverage);
+      
+      console.log(`📊 Transaction recorded: ${duration}s, new avg: ${newAverage.toFixed(0)}s`);
+    }
+    
+    const profile = db.getUserProfile(sessionId);
     
     res.json({
       success: true,
       message: 'Modal oturumu kapatıldı',
-      duration: result.duration,
-      wasRecorded: result.wasRecorded,
-      newAverageDuration: behavior?.averageTransactionDuration
+      duration,
+      interactions,
+      wasRecorded: wasSuccessful,
+      newAverageDuration: profile.averageDuration
     });
     
   } catch (error) {
@@ -2290,22 +2323,21 @@ app.post('/api/security/email/register', (req, res) => {
       return res.status(401).json({ success: false, error: 'Geçersiz oturum' });
     }
     
-    // Basit email validasyonu
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!email || !emailRegex.test(email)) {
+    // E-posta validasyonu
+    if (!email || !isValidEmail(email)) {
       return res.status(400).json({ success: false, error: 'Geçersiz e-posta adresi' });
     }
     
-    const behavior = initUserBehavior(sessionId);
-    behavior.email = email;
-    behavior.emailVerified = true; // Gerçek uygulamada e-posta doğrulaması yapılır
+    // SQLite'a kaydet
+    db.getOrCreateProfile(sessionId);
+    db.updateUserEmail(sessionId, email);
     
     console.log(`📧 Email registered for ${sessionId}: ${email}`);
     
     res.json({
       success: true,
       message: 'E-posta adresi kaydedildi',
-      email: email.replace(/(.{3}).*@/, '$1***@') // Maskelenmiş göster
+      email: email.replace(/(.{3}).*@/, '$1***@')
     });
     
   } catch (error) {
@@ -2365,17 +2397,49 @@ app.post('/api/security/email/verify', (req, res) => {
       return res.status(400).json({ success: false, error: 'Token ID ve kod gerekli' });
     }
     
-    const result = verifyToken(tokenId, code);
+    // SQLite'dan token'ı al
+    const token = db.getVerificationToken(tokenId);
     
-    if (!result.success) {
-      return res.status(400).json(result);
+    if (!token) {
+      return res.status(400).json({ success: false, error: 'Token bulunamadı veya süresi dolmuş' });
     }
+    
+    // Süre kontrolü
+    if (new Date(token.expires_at) < new Date()) {
+      db.deleteToken(tokenId);
+      return res.status(400).json({ success: false, error: 'Token süresi dolmuş' });
+    }
+    
+    // Zaten doğrulanmış mı?
+    if (token.verified) {
+      return res.json({ success: true, message: 'Zaten doğrulanmış', alreadyVerified: true });
+    }
+    
+    // Deneme sayısı kontrolü
+    if (token.attempts >= 3) {
+      db.deleteToken(tokenId);
+      return res.status(400).json({ success: false, error: 'Çok fazla hatalı deneme, token iptal edildi' });
+    }
+    
+    // Kod kontrolü
+    if (token.code !== code) {
+      db.incrementTokenAttempts(tokenId);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Yanlış kod',
+        attemptsLeft: 3 - token.attempts - 1
+      });
+    }
+    
+    // ✅ Doğrulama başarılı
+    db.markTokenVerified(tokenId);
+    console.log(`✅ Token verified: ${tokenId}`);
     
     res.json({
       success: true,
-      message: result.message,
+      message: 'Doğrulama başarılı',
       verified: true,
-      transactionDetails: result.transactionDetails
+      transactionDetails: token.transaction_data
     });
     
   } catch (error) {
@@ -2434,79 +2498,124 @@ app.post('/api/security/pre-sign', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Hesap bulunamadı' });
     }
     
-    // Bakiyeyi al
-    let balance = '0';
-    try {
-      const rawBalance = await accountData.account.getBalance();
-      const [blockchain] = accountId.split('-');
-      if (blockchain === 'ethereum') {
-        balance = (Number(rawBalance) / 1e18).toFixed(8);
-      } else {
-        balance = rawBalance.toString();
-      }
-    } catch (e) {
-      console.log('Balance fetch failed:', e.message);
-    }
+    // 📊 SQLite'dan kullanıcı profilini al
+    const userProfile = db.getUserProfile(sessionId);
     
-    // Tam güvenlik analizi (timing dahil)
-    const analysis = analyzeTransactionSecurity(sessionId, {
-      to,
-      amount,
-      balance,
-      type: 'transfer',
-      modalType
-    });
+    // ⏱️ Modal süresini hesapla
+    const sessionKey = `${sessionId}-${modalType}`;
+    const modalSession = activeModalSessions.get(sessionKey);
+    const duration = modalSession 
+      ? Math.round((Date.now() - modalSession.startTime) / 1000) 
+      : 0;
+    const interactions = modalSession?.interactionCount || 0;
     
-    const behavior = userBehaviorData.get(sessionId);
+    // 🔍 Adres daha önce kullanılmış mı?
+    const isNewAddress = !db.isKnownAddress(sessionId, to);
     
     console.log(`🛡️ Pre-Sign Security Check:`);
-    console.log(`   Risk Score: ${analysis.summary.totalRiskScore}/100`);
-    console.log(`   Duration: ${analysis.summary.timingDetails?.durationSeconds}s (avg: ${analysis.summary.timingDetails?.averageDuration}s)`);
-    console.log(`   Action: ${analysis.summary.recommendedAction}`);
+    console.log(`   Session: ${sessionId}`);
+    console.log(`   Duration: ${duration}s (avg: ${userProfile.averageDuration?.toFixed(0)}s)`);
+    console.log(`   Interactions: ${interactions}`);
+    console.log(`   New Address: ${isNewAddress}`);
+    console.log(`   Total TX History: ${userProfile.totalTransactions}`);
     
-    // E-posta doğrulama gerekiyorsa
-    if (analysis.summary.requiresEmailVerification) {
+    // 🤖 Gemini AI ile analiz
+    const aiAnalysis = await analyzeUserBehavior(userProfile, {
+      duration,
+      amount: parseFloat(amount),
+      to,
+      interactions,
+      isNewAddress
+    });
+    
+    console.log(`   AI Risk Score: ${aiAnalysis.riskScore}/100 (${aiAnalysis.riskLevel})`);
+    console.log(`   AI Source: ${aiAnalysis.source}`);
+    console.log(`   Reasons: ${aiAnalysis.reasons?.join(', ')}`);
+    
+    // E-posta doğrulama gerekiyor mu?
+    if (aiAnalysis.requiresVerification) {
       // E-posta kayıtlı mı?
-      if (!behavior?.email) {
+      const userEmail = db.getUserEmail(sessionId);
+      
+      if (!userEmail) {
+        // ❌ E-posta kayıtlı değil - kayıt istenmeli
         return res.status(403).json({
           success: false,
           blocked: true,
           reason: 'email_required',
           message: '⏱️ Bu işlem normalden çok hızlı gerçekleşti. Güvenlik için e-posta doğrulaması gerekiyor.',
-          analysis: analysis.summary,
+          analysis: {
+            riskScore: aiAnalysis.riskScore,
+            riskLevel: aiAnalysis.riskLevel,
+            reasons: aiAnalysis.reasons,
+            duration,
+            averageDuration: userProfile.averageDuration,
+            source: aiAnalysis.source
+          },
           requiresEmailRegistration: true
         });
       }
       
-      // Doğrulama token'ı oluştur
-      const token = createVerificationToken(sessionId, behavior.email, {
+      // 📧 Doğrulama kodu oluştur ve e-posta gönder
+      const code = generateVerificationCode();
+      const tokenId = `verify-${sessionId}-${Date.now()}`;
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      
+      // SQLite'a kaydet
+      db.createVerificationToken(tokenId, sessionId, userEmail, code, {
         to,
         amount,
-        accountId
+        accountId,
+        duration,
+        riskScore: aiAnalysis.riskScore
+      }, expiresAt);
+      
+      // E-posta gönder
+      const emailResult = await sendVerificationEmail(userEmail, code, {
+        amount,
+        token: 'ETH',
+        toAddress: to
       });
+      
+      console.log(`📧 Verification email sent to ${userEmail}`);
       
       return res.status(403).json({
         success: false,
         blocked: true,
         reason: 'email_verification_required',
-        message: `⏱️ Bu işlem ${analysis.summary.timingDetails?.durationSeconds}sn'de gerçekleşti (normal: ${analysis.summary.timingDetails?.averageDuration}sn). Güvenlik için e-posta doğrulaması gerekiyor.`,
-        analysis: analysis.summary,
+        message: `⏱️ Bu işlem ${duration}sn'de gerçekleşti (normal: ${userProfile.averageDuration?.toFixed(0)}sn). Güvenlik için e-posta doğrulaması gerekiyor.`,
+        analysis: {
+          riskScore: aiAnalysis.riskScore,
+          riskLevel: aiAnalysis.riskLevel,
+          reasons: aiAnalysis.reasons,
+          duration,
+          averageDuration: userProfile.averageDuration,
+          source: aiAnalysis.source
+        },
         verification: {
-          tokenId: token.tokenId,
-          email: behavior.email.replace(/(.{3}).*@/, '$1***@'),
-          expiresAt: token.expiresAt,
-          // ⚠️ Demo için
-          _demoCode: token._demoCode
+          tokenId,
+          email: userEmail.replace(/(.{3}).*@/, '$1***@'),
+          _rawEmail: userEmail, // Frontend EmailJS için
+          expiresAt,
+          // Kodu her zaman gönder (Frontend EmailJS ile e-posta atacak)
+          _demoCode: code
         }
       });
     }
     
-    // İşlem onaylandı
+    // ✅ İşlem onaylandı
     res.json({
       success: true,
       approved: true,
       message: '✓ Güvenlik kontrolü başarılı, işlem onaylandı',
-      analysis: analysis.summary
+      analysis: {
+        riskScore: aiAnalysis.riskScore,
+        riskLevel: aiAnalysis.riskLevel,
+        reasons: aiAnalysis.reasons,
+        duration,
+        averageDuration: userProfile.averageDuration,
+        source: aiAnalysis.source
+      }
     });
     
   } catch (error) {
@@ -2524,18 +2633,26 @@ app.post('/api/security/confirm-after-verification', (req, res) => {
       return res.status(400).json({ success: false, error: 'Token ID gerekli' });
     }
     
-    // Token doğrulanmış mı?
-    if (!isTokenVerified(tokenId)) {
+    // SQLite'dan token'ı al
+    const token = db.getVerificationToken(tokenId);
+    
+    if (!token) {
       return res.status(403).json({
         success: false,
-        error: 'Token henüz doğrulanmamış veya geçersiz'
+        error: 'Token bulunamadı veya geçersiz'
       });
     }
     
-    const token = emailVerificationTokens.get(tokenId);
+    // Token doğrulanmış mı?
+    if (!token.verified) {
+      return res.status(403).json({
+        success: false,
+        error: 'Token henüz doğrulanmamış'
+      });
+    }
     
-    // Token'ı kullanıldı olarak işaretle ve sil
-    emailVerificationTokens.delete(tokenId);
+    // Token'ı sil
+    db.deleteToken(tokenId);
     
     console.log(`✅ Transaction approved after email verification: ${tokenId}`);
     
@@ -2543,7 +2660,7 @@ app.post('/api/security/confirm-after-verification', (req, res) => {
       success: true,
       approved: true,
       message: '✓ E-posta doğrulaması başarılı, işlem onaylandı',
-      transactionDetails: token.transactionDetails
+      transactionDetails: token.transaction_data
     });
     
   } catch (error) {

@@ -493,6 +493,55 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+.reasonsList {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* E-posta Kayıt Input */
+.emailInputWrapper {
+  display: flex;
+  align-items: center;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  padding: 4px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+
+.emailInputWrapper:focus-within {
+  border-color: var(--accent-cyan);
+}
+
+.emailIcon {
+  margin: 0 12px;
+  color: var(--text-muted);
+}
+
+.emailInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 14px 14px 14px 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.emailInput:focus {
+  outline: none;
+}
+
+.emailInput::placeholder {
+  color: var(--text-muted);
+}
+
 @media (max-width: 480px) {
   .modal {
     max-height: 90vh;

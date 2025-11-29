@@ -8,15 +8,26 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["wdk", "wallet", "crypto", "api"],
+  "keywords": [
+    "wdk",
+    "wallet",
+    "crypto",
+    "api"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@tetherto/wdk": "^1.0.0-beta.4",
     "@tetherto/wdk-wallet-btc": "^1.0.0-beta.3",
     "@tetherto/wdk-wallet-evm": "^1.0.0-beta.4",
     "@tetherto/wdk-wallet-tron": "^1.0.0-beta.3",
+    "better-sqlite3": "^12.5.0",
     "cors": "^2.8.5",
-    "express": "^4.21.0"
+    "dotenv": "^17.2.3",
+    "express": "^4.21.0",
+    "nodemailer": "^7.0.11",
+    "resend": "^6.5.2",
+    "sib-api-v3-sdk": "^8.5.0"
   }
 }

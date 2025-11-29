@@ -1,0 +1,25 @@
+# ============================================
+# WDK Wallet Backend - Environment Variables
+# ============================================
+# Bu dosyayı .env olarak kopyalayın ve değerleri doldurun:
+# cp env-template.txt .env
+
+# 🤖 Gemini AI API Key
+# https://makersuite.google.com/app/apikey adresinden alabilirsiniz
+GEMINI_API_KEY=your-gemini-api-key-here
+
+# 📧 E-posta Ayarları (SMTP)
+# Gmail için: https://myaccount.google.com/apppasswords adresinden App Password alın
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+
+# Gönderen bilgisi
+FROM_EMAIL=security@wdk-wallet.com
+FROM_NAME=WDK Wallet Security
+
+# Server port (opsiyonel)
+PORT=3001
+

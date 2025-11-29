@@ -10,8 +10,13 @@
  */
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONFIG } from '../config/emailjs';
 
 const API_BASE = 'http://localhost:3001';
+
+// EmailJS başlat
+emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);
 
 export function useSecurityTiming(sessionId, modalType = 'transfer') {
   const [isTracking, setIsTracking] = useState(false);
@@ -23,6 +28,35 @@ export function useSecurityTiming(sessionId, modalType = 'transfer') {
   
   const timerRef = useRef(null);
   const startTimeRef = useRef(null);
+
+  // 📧 EmailJS ile e-posta gönder
+  const sendVerificationEmail = useCallback(async (toEmail, code, transactionDetails) => {
+    try {
+      console.log('📧 Sending verification email via EmailJS...');
+      console.log('   To:', toEmail);
+      console.log('   Code:', code);
+      
+      const result = await emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        {
+          to_email: toEmail,
+          code: code,
+          amount: transactionDetails?.amount || '0',
+          token: transactionDetails?.token || 'ETH',
+          to_address: transactionDetails?.toAddress 
+            ? `${transactionDetails.toAddress.slice(0, 10)}...${transactionDetails.toAddress.slice(-8)}`
+            : 'N/A'
+        }
+      );
+      
+      console.log('✅ Email sent successfully:', result);
+      return { success: true, result };
+    } catch (error) {
+      console.error('❌ EmailJS error:', error);
+      return { success: false, error: error.text || error.message };
+    }
+  }, []);
 
   // ⏱️ Modal açıldığında zamanlayıcıyı başlat
   const startTracking = useCallback(async () => {
@@ -96,8 +130,31 @@ export function useSecurityTiming(sessionId, modalType = 'transfer') {
       
       const data = await response.json();
       
-      // E-posta doğrulaması gerekiyorsa
+      // 📧 E-posta kaydı gerekiyorsa
+      if (data.blocked && data.requiresEmailRegistration) {
+        return {
+          approved: false,
+          requiresEmailRegistration: true,
+          message: data.message,
+          analysis: data.analysis
+        };
+      }
+      
+      // 📧 E-posta doğrulaması gerekiyorsa
       if (data.blocked && data.verification) {
+        // Frontend'den EmailJS ile e-posta gönder
+        const emailResult = await sendVerificationEmail(
+          data.verification._rawEmail, // Maskeli olmayan e-posta
+          data.verification._demoCode, // Doğrulama kodu
+          {
+            amount: amount,
+            token: 'ETH',
+            toAddress: to
+          }
+        );
+        
+        console.log('📧 Email send result:', emailResult);
+        
         setVerificationRequired(true);
         setVerificationData({
           tokenId: data.verification.tokenId,
@@ -105,14 +162,18 @@ export function useSecurityTiming(sessionId, modalType = 'transfer') {
           expiresAt: data.verification.expiresAt,
           message: data.message,
           analysis: data.analysis,
-          // Demo için
-          _demoCode: data.verification._demoCode
+          // Demo için (e-posta gönderilemediyse göster)
+          _demoCode: !emailResult.success ? data.verification._demoCode : undefined,
+          emailSent: emailResult.success
         });
         
         return {
           approved: false,
           requiresVerification: true,
-          ...data
+          message: data.message,
+          analysis: data.analysis,
+          verification: data.verification,
+          emailSent: emailResult.success
         };
       }
       
@@ -186,7 +247,7 @@ export function useSecurityTiming(sessionId, modalType = 'transfer') {
   }, [verificationData]);
 
   // ⏹️ Modal kapandığında zamanlayıcıyı durdur
-  const endTracking = useCallback(async (wasSuccessful = true) => {
+  const endTracking = useCallback(async (wasSuccessful = true, txData = {}) => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -198,7 +259,12 @@ export function useSecurityTiming(sessionId, modalType = 'transfer') {
       const response = await fetch(`${API_BASE}/api/security/modal/end`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, modalType, wasSuccessful })
+        body: JSON.stringify({ 
+          sessionId, 
+          modalType, 
+          wasSuccessful,
+          txData // İşlem verileri (amount, to, token, riskScore)
+        })
       });
       
       const data = await response.json();

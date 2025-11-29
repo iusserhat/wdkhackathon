@@ -5,17 +5,21 @@ import { useWallet } from '../hooks/useWallet'
 import { useSecurityTiming, useInteractionListener } from '../hooks/useSecurityTiming'
 import styles from './TransactionModal.module.css'
 
+const API_BASE = 'http://localhost:3001'
+
 export default function TransactionModal({ account, onClose }) {
   const { sendTransaction, isLoading, sessionId } = useWallet()
   const [recipient, setRecipient] = useState('')
   const [amount, setAmount] = useState('')
   const [error, setError] = useState('')
   const [txResult, setTxResult] = useState(null)
-  const [status, setStatus] = useState('form') // form, security_check, verification, sending, success, error
+  const [status, setStatus] = useState('form') // form, security_check, email_register, verification, sending, success, error
   
   // 📧 E-posta doğrulama state
   const [verificationCode, setVerificationCode] = useState('')
   const [securityWarning, setSecurityWarning] = useState(null)
+  const [emailInput, setEmailInput] = useState('')
+  const [analysisData, setAnalysisData] = useState(null)
 
   const { blockchain, config, address } = account
 
@@ -80,9 +84,18 @@ export default function TransactionModal({ account, onClose }) {
         amount
       })
 
-      // E-posta doğrulaması gerekiyor
+      // 📧 E-posta kaydı gerekiyor
+      if (preSignResult.requiresEmailRegistration) {
+        setStatus('email_register')
+        setSecurityWarning(preSignResult.message)
+        setAnalysisData(preSignResult.analysis)
+        return
+      }
+
+      // 📧 E-posta doğrulaması gerekiyor
       if (preSignResult.requiresVerification) {
         setSecurityWarning(preSignResult.message)
+        setAnalysisData(preSignResult.analysis)
         // verificationData otomatik olarak set ediliyor
         return
       }
@@ -98,6 +111,61 @@ export default function TransactionModal({ account, onClose }) {
     } catch (err) {
       setError(err.message)
       setStatus('error')
+    }
+  }
+
+  // 📧 E-posta kaydet ve tekrar dene
+  const handleRegisterEmail = async () => {
+    if (!emailInput.trim()) {
+      setError('Lütfen e-posta adresinizi girin')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(emailInput)) {
+      setError('Geçerli bir e-posta adresi girin')
+      return
+    }
+
+    setError('')
+    setStatus('security_check')
+
+    try {
+      // E-postayı kaydet
+      const response = await fetch(`${API_BASE}/api/security/email/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, email: emailInput.trim() })
+      })
+
+      const data = await response.json()
+
+      if (!data.success) {
+        setError(data.error)
+        setStatus('email_register')
+        return
+      }
+
+      // Tekrar pre-sign kontrolü yap
+      const preSignResult = await checkPreSign({
+        accountId: account.id,
+        to: recipient.trim(),
+        amount
+      })
+
+      if (preSignResult.requiresVerification) {
+        setSecurityWarning(preSignResult.message)
+        setAnalysisData(preSignResult.analysis)
+        return
+      }
+
+      if (preSignResult.approved) {
+        await executeTransaction()
+      }
+
+    } catch (err) {
+      setError(err.message)
+      setStatus('email_register')
     }
   }
 
@@ -138,7 +206,7 @@ export default function TransactionModal({ account, onClose }) {
   }
 
   // Gerçek transfer işlemi
-  const executeTransaction = async () => {
+  const executeTransaction = async (riskScore = 0) => {
     setStatus('sending')
     
     try {
@@ -146,8 +214,13 @@ export default function TransactionModal({ account, onClose }) {
       setTxResult(result)
       setStatus('success')
       
-      // Başarılı işlemi kaydet
-      await endTracking(true)
+      // Başarılı işlemi kaydet (txData ile)
+      await endTracking(true, {
+        amount: parseFloat(amount),
+        to: recipient.trim(),
+        token: config.symbol,
+        riskScore: analysisData?.riskScore || riskScore
+      })
     } catch (err) {
       setError(err.message)
       setStatus('error')
@@ -301,6 +374,105 @@ export default function TransactionModal({ account, onClose }) {
               <h3>Güvenlik Kontrolü</h3>
               <p>Davranış analizi yapılıyor...</p>
               <Loader2 size={24} className={styles.spinner} />
+            </motion.div>
+          )}
+
+          {/* 📧 E-posta Kayıt Ekranı */}
+          {status === 'email_register' && (
+            <motion.div
+              key="email_register"
+              className={styles.statusContent}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className={styles.warningIconWrapper}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', bounce: 0.5 }}
+              >
+                <AlertTriangle size={50} className={styles.warningIcon} />
+              </motion.div>
+              
+              <h3>⏱️ Hızlı İşlem Algılandı</h3>
+              <p className={styles.warningText}>{securityWarning}</p>
+
+              <div className={styles.verificationBox}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
+                  Güvenlik için e-posta adresinizi kaydetmeniz gerekiyor.
+                  İşlemi onaylamak için size bir doğrulama kodu göndereceğiz.
+                </p>
+
+                <div className={styles.emailInputWrapper}>
+                  <Mail size={18} className={styles.emailIcon} />
+                  <input
+                    type="email"
+                    className={styles.emailInput}
+                    placeholder="ornek@email.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                  />
+                </div>
+
+                {error && (
+                  <motion.div 
+                    className={styles.error}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {error}
+                  </motion.div>
+                )}
+
+                <div className={styles.verificationActions}>
+                  <motion.button
+                    className={styles.verifyBtn}
+                    onClick={handleRegisterEmail}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Mail size={18} />
+                    <span>Kaydet ve Devam Et</span>
+                  </motion.button>
+                  
+                  <button 
+                    className={styles.cancelVerifyBtn}
+                    onClick={() => {
+                      setStatus('form')
+                      setEmailInput('')
+                      setError('')
+                    }}
+                  >
+                    İptal
+                  </button>
+                </div>
+
+                {/* Risk Analizi */}
+                {analysisData && (
+                  <div className={styles.analysisBox}>
+                    <strong>Risk Analizi ({analysisData.source === 'gemini' ? '🤖 AI' : '📊 Sistem'})</strong>
+                    <div className={styles.analysisGrid}>
+                      <span>Risk Skoru:</span>
+                      <span className={styles.riskScore}>
+                        {analysisData.riskScore}/100
+                      </span>
+                      <span>Süre:</span>
+                      <span>
+                        {analysisData.duration}s 
+                        (normal: {analysisData.averageDuration?.toFixed(0)}s)
+                      </span>
+                    </div>
+                    {analysisData.reasons?.length > 0 && (
+                      <div className={styles.reasonsList}>
+                        {analysisData.reasons.map((reason, i) => (
+                          <span key={i}>• {reason}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </motion.div>
           )}
 
