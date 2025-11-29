@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Key, ArrowRight, Shield, Zap, Globe, Loader2, AlertCircle, Wallet, Trash2, Clock } from 'lucide-react'
+import { Sparkles, Key, ArrowRight, Shield, Zap, Globe, Loader2, AlertCircle, FolderOpen } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import styles from './Welcome.module.css'
 
@@ -11,11 +11,10 @@ export default function Welcome() {
     isLoading, 
     error: walletError,
     walletsHistory,
-    switchWallet,
-    deleteWalletFromHistory
+    goToWallets
   } = useWallet()
   
-  const [mode, setMode] = useState('select') // select, create, import
+  const [mode, setMode] = useState('select') // select, import
   const [importSeed, setImportSeed] = useState('')
   const [importError, setImportError] = useState('')
   const [createError, setCreateError] = useState('')
@@ -51,27 +50,6 @@ export default function Welcome() {
     }
   }
 
-  const handleSwitchWallet = async (seed) => {
-    try {
-      await switchWallet(seed)
-    } catch (err) {
-      console.error('Switch wallet error:', err)
-      setCreateError(err.message || 'Cüzdan değiştirilemedi')
-    }
-  }
-
-  const handleDeleteWallet = (e, seed) => {
-    e.stopPropagation()
-    if (window.confirm('Bu cüzdanı geçmişten silmek istediğinize emin misiniz?')) {
-      deleteWalletFromHistory(seed)
-    }
-  }
-
-  const truncateSeed = (seed) => {
-    const words = seed.split(' ')
-    return `${words[0]} ${words[1]} ... ${words[words.length - 1]}`
-  }
-
   const features = [
     { icon: Shield, title: 'Self-Custody', desc: 'Anahtarlarınız sizde kalır' },
     { icon: Zap, title: 'Çoklu Zincir', desc: 'BTC, ETH, TRON desteği' },
@@ -100,84 +78,33 @@ export default function Welcome() {
           </motion.div>
 
           <h1 className={styles.title}>
-            {hasWallets ? (
-              <>
-                <span className={styles.gradientText}>Cüzdanlarınız</span>
-              </>
-            ) : (
-              <>
-                <span className={styles.gradientText}>Kripto Cüzdanınızı</span>
-                <br />
-                Oluşturun
-              </>
-            )}
+            <span className={styles.gradientText}>Kripto Cüzdanınızı</span>
+            <br />
+            Oluşturun
           </h1>
 
           <p className={styles.subtitle}>
-            {hasWallets 
-              ? 'Mevcut bir cüzdanı seçin veya yeni bir tane oluşturun.'
-              : 'WDK Tether Wallet SDK ile güvenli, kendi kendine saklama özellikli çoklu zincir kripto cüzdanı.'
-            }
+            WDK Tether Wallet SDK ile güvenli, kendi kendine saklama özellikli 
+            çoklu zincir kripto cüzdanı.
           </p>
 
-          {!hasWallets && (
-            <div className={styles.features}>
-              {features.map((feature, i) => (
-                <motion.div 
-                  key={feature.title}
-                  className={styles.feature}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                >
-                  <feature.icon size={20} />
-                  <div>
-                    <h4>{feature.title}</h4>
-                    <p>{feature.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {/* Saved Wallets List */}
-          {hasWallets && (
-            <div className={styles.savedWallets}>
-              <h3 className={styles.savedWalletsTitle}>
-                <Clock size={18} />
-                <span>Kayıtlı Cüzdanlar</span>
-              </h3>
-              <div className={styles.walletsList}>
-                {walletsHistory.map((wallet, index) => (
-                  <motion.div
-                    key={wallet.id}
-                    className={styles.walletItem}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    onClick={() => handleSwitchWallet(wallet.seedPhrase)}
-                  >
-                    <div className={styles.walletIcon}>
-                      <Wallet size={20} />
-                    </div>
-                    <div className={styles.walletInfo}>
-                      <span className={styles.walletName}>{wallet.name}</span>
-                      <code className={styles.walletSeed}>{truncateSeed(wallet.seedPhrase)}</code>
-                    </div>
-                    <motion.button
-                      className={styles.deleteWalletBtn}
-                      onClick={(e) => handleDeleteWallet(e, wallet.seedPhrase)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      title="Cüzdanı sil"
-                    >
-                      <Trash2 size={16} />
-                    </motion.button>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
+          <div className={styles.features}>
+            {features.map((feature, i) => (
+              <motion.div 
+                key={feature.title}
+                className={styles.feature}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
+              >
+                <feature.icon size={20} />
+                <div>
+                  <h4>{feature.title}</h4>
+                  <p>{feature.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         <motion.div 
@@ -235,6 +162,26 @@ export default function Welcome() {
                   <Key size={20} />
                   <span>Seed Phrase ile İçe Aktar</span>
                 </motion.button>
+
+                {/* Show "My Wallets" button if there are saved wallets */}
+                {hasWallets && (
+                  <>
+                    <div className={styles.divider}>
+                      <span>veya</span>
+                    </div>
+                    
+                    <motion.button
+                      className={styles.walletsBtn}
+                      onClick={goToWallets}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <FolderOpen size={20} />
+                      <span>Cüzdanlarım</span>
+                      <span className={styles.walletCount}>{walletsHistory.length}</span>
+                    </motion.button>
+                  </>
+                )}
               </motion.div>
             )}
 

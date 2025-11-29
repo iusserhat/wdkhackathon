@@ -1,6 +1,7 @@
 import { WalletProvider, useWallet } from './hooks/useWallet'
 import Header from './components/Header'
 import Welcome from './components/Welcome'
+import MyWallets from './components/MyWallets'
 import Dashboard from './components/Dashboard'
 import { motion } from 'framer-motion'
 
@@ -37,17 +38,30 @@ function LoadingScreen() {
 }
 
 function WalletApp() {
-  const { isInitialized, isLoading } = useWallet()
+  const { isInitialized, isLoading, currentPage } = useWallet()
 
   // Show loading only on initial load
-  if (isLoading && !isInitialized) {
+  if (isLoading && !isInitialized && currentPage === 'welcome') {
     return <LoadingScreen />
+  }
+
+  // Render based on current page
+  const renderPage = () => {
+    if (isInitialized && currentPage === 'dashboard') {
+      return <Dashboard />
+    }
+    
+    if (currentPage === 'wallets') {
+      return <MyWallets />
+    }
+    
+    return <Welcome />
   }
 
   return (
     <div className="app">
       <Header />
-      {isInitialized ? <Dashboard /> : <Welcome />}
+      {renderPage()}
     </div>
   )
 }

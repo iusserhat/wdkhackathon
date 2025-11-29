@@ -295,6 +295,35 @@
   border-color: var(--accent-cyan);
 }
 
+.walletsBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 18px 24px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 16px;
+  color: var(--accent-green);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.walletsBtn:hover {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: var(--accent-green);
+}
+
+.walletCount {
+  padding: 4px 10px;
+  background: var(--accent-green);
+  color: var(--bg-primary);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 /* Import Mode */
 .importMode {
   display: flex;
@@ -440,6 +469,261 @@
   .secondaryBtn {
     padding: 16px 20px;
     font-size: 0.95rem;
+  }
+}
+
+/* Wallet Selection View */
+.walletSelectionContainer {
+  max-width: 900px;
+  width: 100%;
+  padding: 0 24px;
+}
+
+.walletSelectionHeader {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.walletSelectionTitle {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.walletSelectionSubtitle {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+}
+
+.walletsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.walletCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.walletCard:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 10px 40px rgba(0, 245, 255, 0.15);
+}
+
+.walletCardIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-1);
+  border-radius: 18px;
+  color: var(--bg-primary);
+  margin-bottom: 16px;
+}
+
+.walletCardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.walletCardName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.walletCardSeed {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  padding: 4px 10px;
+  background: rgba(0, 245, 255, 0.1);
+  border-radius: 6px;
+}
+
+.walletAccountsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: var(--accent-green);
+  margin-top: 6px;
+}
+
+.walletAccountsBadge svg {
+  opacity: 0.8;
+}
+
+.walletCardDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.walletCard .deleteWalletBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  opacity: 0;
+}
+
+.walletCard:hover .deleteWalletBtn {
+  opacity: 1;
+}
+
+/* New Wallet Card */
+.newWalletCard {
+  border-style: dashed;
+  border-color: var(--accent-cyan);
+  background: rgba(0, 245, 255, 0.03);
+}
+
+.newWalletCard:hover {
+  background: rgba(0, 245, 255, 0.08);
+  border-style: solid;
+}
+
+.newWalletIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px dashed var(--accent-cyan);
+  border-radius: 18px;
+  color: var(--accent-cyan);
+  margin-bottom: 16px;
+}
+
+.newWalletCard:hover .newWalletIcon {
+  background: var(--gradient-1);
+  border-style: solid;
+  color: var(--bg-primary);
+}
+
+.newWalletText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+/* Import Wallet Card */
+.importWalletCard {
+  border-style: dashed;
+  border-color: var(--accent-purple);
+  background: rgba(139, 92, 246, 0.03);
+}
+
+.importWalletCard:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-style: solid;
+  border-color: var(--accent-purple);
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+}
+
+.importWalletIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px dashed var(--accent-purple);
+  border-radius: 18px;
+  color: var(--accent-purple);
+  margin-bottom: 16px;
+}
+
+.importWalletCard:hover .importWalletIcon {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-magenta));
+  border-style: solid;
+  color: white;
+}
+
+.importWalletText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+}
+
+/* Import Overlay/Modal */
+.importOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.importModal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.importModal h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.importModal > p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.importModalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.importModalActions .primaryBtn {
+  flex: 2;
+}
+
+.importModalActions .backBtn {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .walletsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .walletSelectionTitle {
+    font-size: 2rem;
+  }
+  
+  .walletCard .deleteWalletBtn {
+    opacity: 1;
   }
 }
 

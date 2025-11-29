@@ -1,0 +1,422 @@
+.container {
+  min-height: calc(100vh - 80px);
+  padding: 40px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  max-width: 1000px;
+  margin: 0 auto 40px;
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.titleSection {
+  flex: 1;
+}
+
+.titleSection h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.titleSection p {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.gradientText {
+  background: var(--gradient-1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.errorBox {
+  max-width: 1000px;
+  margin: 0 auto 24px;
+  padding: 14px 16px;
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  border-radius: 12px;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.walletsGrid {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.walletCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.walletCard:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 10px 40px rgba(0, 245, 255, 0.15);
+}
+
+.walletCardIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gradient-1);
+  border-radius: 18px;
+  color: var(--bg-primary);
+  margin-bottom: 16px;
+}
+
+.walletCardInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.walletCardName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.walletCardSeed {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  padding: 4px 10px;
+  background: rgba(0, 245, 255, 0.1);
+  border-radius: 6px;
+}
+
+.walletAccountsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: var(--accent-green);
+  margin-top: 6px;
+}
+
+.walletCardDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.deleteWalletBtn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.walletCard:hover .deleteWalletBtn {
+  opacity: 1;
+}
+
+.deleteWalletBtn:hover {
+  background: rgba(255, 100, 100, 0.1);
+  border-color: rgba(255, 100, 100, 0.3);
+  color: #ff6b6b;
+}
+
+/* New Wallet Card */
+.newWalletCard {
+  border-style: dashed;
+  border-color: var(--accent-cyan);
+  background: rgba(0, 245, 255, 0.03);
+}
+
+.newWalletCard:hover {
+  background: rgba(0, 245, 255, 0.08);
+  border-style: solid;
+}
+
+.newWalletIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px dashed var(--accent-cyan);
+  border-radius: 18px;
+  color: var(--accent-cyan);
+  margin-bottom: 16px;
+}
+
+.newWalletCard:hover .newWalletIcon {
+  background: var(--gradient-1);
+  border-style: solid;
+  color: var(--bg-primary);
+}
+
+.newWalletText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+/* Import Wallet Card */
+.importWalletCard {
+  border-style: dashed;
+  border-color: var(--accent-purple);
+  background: rgba(139, 92, 246, 0.03);
+}
+
+.importWalletCard:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-style: solid;
+  border-color: var(--accent-purple);
+  box-shadow: 0 10px 40px rgba(139, 92, 246, 0.15);
+}
+
+.importWalletIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px dashed var(--accent-purple);
+  border-radius: 18px;
+  color: var(--accent-purple);
+  margin-bottom: 16px;
+}
+
+.importWalletCard:hover .importWalletIcon {
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-magenta));
+  border-style: solid;
+  color: white;
+}
+
+.importWalletText {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-purple);
+}
+
+.spinner {
+  color: var(--accent-cyan);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  padding: 32px;
+}
+
+.modal h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.modal > p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.seedInput {
+  width: 100%;
+  padding: 16px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  resize: none;
+  line-height: 1.6;
+}
+
+.seedInput:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1);
+}
+
+.seedInput::placeholder {
+  color: var(--text-muted);
+}
+
+.error {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancelBtn {
+  flex: 1;
+  padding: 14px 24px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.cancelBtn:hover {
+  background: var(--bg-tertiary);
+}
+
+.primaryBtn {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: var(--gradient-1);
+  border-radius: 14px;
+  color: var(--bg-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  box-shadow: 0 0 25px rgba(0, 245, 255, 0.4);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.7;
+}
+
+/* Decorations */
+.decorations {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.orb1 {
+  position: absolute;
+  top: 10%;
+  right: 10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, var(--accent-cyan) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.3;
+}
+
+.orb2 {
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, var(--accent-purple) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.2;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .titleSection h1 {
+    font-size: 2rem;
+  }
+  
+  .walletsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .walletCard .deleteWalletBtn {
+    opacity: 1;
+  }
+}
+
