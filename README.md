@@ -1,214 +1,213 @@
-# WDK Tether Wallet - Kripto Cüzdan Uygulaması
+# 🛡️ WDK Crypto Wallet
 
-Bu proje, WDK (Wallet Development Kit) Tether Wallet SDK kullanılarak oluşturulmuş bir kripto cüzdan uygulamasıdır.
+**Yapay Zeka Destekli Güvenli Kripto Cüzdanı**
 
-## Özellikler
+Tether WDK (Wallet Development Kit) altyapısı üzerine inşa edilmiş, **davranışsal güvenlik sistemi** içeren yenilikçi bir kripto cüzdan uygulaması.
 
-- 🔐 Güvenli seed phrase oluşturma
-- 📱 Çoklu blockchain desteği (Bitcoin, Ethereum, TRON)
-- 💰 Bakiye sorgulama
-- 📤 İşlem gönderme
-- 🔄 Modüler yapı
-- 🎯 Kolay kullanım API'si
+---
 
-## Kurulum
+## 📸 Ekran Görüntüleri
 
-1. Bağımlılıkları yükleyin:
+### Cüzdan Oluşturma
+![Cüzdan Oluşturma](frontend/public/1.jpeg)
+
+### Ana Dashboard
+![Dashboard](frontend/public/2.jpeg)
+
+### Hesap Detayları
+![Hesap Detayları](frontend/public/3.jpeg)
+
+### Transfer İşlemi
+![Transfer](frontend/public/4.jpeg)
+
+### Güvenlik Uyarısı
+![Güvenlik Uyarısı](frontend/public/5.jpeg)
+
+### E-posta Doğrulaması
+![E-posta Doğrulaması](frontend/public/6.jpeg)
+
+### Risk Analizi
+![Risk Analizi](frontend/public/7.jpeg)
+
+### İşlem Onayı
+![İşlem Onayı](frontend/public/8.jpeg)
+
+### Başarılı İşlem
+![Başarılı İşlem](frontend/public/9.jpeg)
+
+---
+
+## ✨ Özellikler
+
+### 🔐 Güvenlik
+- **AI Destekli Davranış Analizi** - Google Gemini ile anormal aktivite tespiti
+- **E-posta Doğrulaması** - Şüpheli işlemlerde 2FA
+- **Sweeping Pattern Tespiti** - Fon boşaltma girişimlerini engelleme
+- **Gece Saati Koruması** - Olağandışı saatlerde ekstra güvenlik
+
+### 💼 Cüzdan
+- **Çoklu Zincir Desteği** - Ethereum, Bitcoin, TRON
+- **Self-Custody** - Anahtarlar tamamen kullanıcıda
+- **12 Kelime Seed Phrase** - BIP39 standardı
+
+### 📱 Kullanıcı Deneyimi
+- **PWA Desteği** - Mobil uygulama gibi kullanım
+- **Modern UI** - Karanlık tema, animasyonlar
+- **Responsive Tasarım** - Her cihazda mükemmel görünüm
+
+---
+
+## 🛡️ Davranışsal Güvenlik Sistemi
+
+Sistem kullanıcının normal davranış paternlerini öğrenir ve anormal aktiviteleri tespit eder:
+
+| Risk Faktörü | Açıklama | Risk Seviyesi |
+|--------------|----------|---------------|
+| ⚡ Çok Hızlı İşlem | < 15 saniye | Kritik |
+| 💰 Yüksek Miktar | > 10x ortalama | Kritik |
+| 📍 Yeni Adres | İlk kez gönderim | Orta-Yüksek |
+| 🌙 Gece Saati | 00:00-06:00 | Orta-Yüksek |
+| 🧹 Sweeping | Hızlı fon boşaltma | Kritik |
+| 🤖 Bot Şüphesi | Sıfır etkileşim | Kritik |
+
+**Risk Skoru 50+ = E-posta doğrulaması zorunlu**
+
+---
+
+## 🚀 Kurulum
+
+### Gereksinimler
+- Node.js 18+
+- npm veya yarn
+
+### Backend
 
 ```bash
+cd backend
 npm install
-```
-
-2. Uygulamayı çalıştırın:
-
-```bash
+cp .env.example .env
+# .env dosyasını düzenle
 npm start
 ```
 
-Geliştirme modu için (otomatik yeniden başlatma):
+### Frontend
 
 ```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-## Kullanım
+### Environment Variables
 
-### Temel Kullanım
-
-```javascript
-import CryptoWallet from './index.js';
-
-const wallet = new CryptoWallet();
-
-// WDK'yı başlat (seed phrase otomatik oluşturulur)
-await wallet.initialize();
-
-// Ethereum hesabı oluştur
-await wallet.createAccount('ethereum', 0);
-
-// Bitcoin hesabı oluştur
-await wallet.createAccount('bitcoin', 0);
-
-// TRON hesabı oluştur
-await wallet.createAccount('tron', 0);
-
-// Bakiye sorgula
-await wallet.getBalance('ethereum', 0);
-
-// İşlem gönder
-await wallet.sendTransaction('ethereum', '0x...', '0.1', 0);
-
-// Tüm hesapları listele
-await wallet.listAccounts();
+**Backend (.env):**
+```env
+NODE_ENV=production
+PORT=3001
+GEMINI_API_KEY=your_gemini_api_key
+EMAILJS_SERVICE_ID=your_service_id
+EMAILJS_TEMPLATE_ID=your_template_id
+EMAILJS_PUBLIC_KEY=your_public_key
+FRONTEND_URL=https://your-frontend.netlify.app
 ```
 
-### Mevcut Seed Phrase ile Kullanım
-
-```javascript
-import CryptoWallet from './index.js';
-
-const wallet = new CryptoWallet();
-
-// Mevcut seed phrase ile başlat
-wallet.seedPhrase = 'your twelve word seed phrase here';
-wallet.wdk = new WDK(wallet.seedPhrase);
-wallet.registerWalletModules();
-
-// Hesap oluştur
-await wallet.createAccount('ethereum', 0);
+**Frontend (.env):**
+```env
+VITE_API_URL=https://your-backend.onrender.com
+VITE_EMAILJS_SERVICE_ID=your_service_id
+VITE_EMAILJS_TEMPLATE_ID=your_template_id
+VITE_EMAILJS_PUBLIC_KEY=your_public_key
 ```
 
-### Seed Phrase Doğrulama
+---
 
-```javascript
-import CryptoWallet from './index.js';
+## 🏗️ Teknik Altyapı
 
-const isValid = CryptoWallet.validateSeedPhrase('your seed phrase here');
-console.log(isValid); // true veya false
-```
+### Frontend
+- **React 18** + Vite
+- **Framer Motion** - Animasyonlar
+- **Lucide Icons** - İkonlar
+- **CSS Modules** - Styling
 
-### Desteklenen Blockchain'ler
+### Backend
+- **Node.js** + Express
+- **SQLite** - Veritabanı
+- **Google Gemini AI** - Davranış analizi
+- **EmailJS** - E-posta servisi
 
-- **Ethereum (ETH)** - EVM uyumlu tüm blockchain'ler (Polygon, Arbitrum, vb.)
-- **Bitcoin (BTC)** - Bitcoin mainnet ve testnet
-- **TRON (TRX)** - TRON mainnet ve testnet
+### Blockchain
+- **Tether WDK SDK**
+- Ethereum (Sepolia Testnet)
+- Bitcoin (Testnet)
+- TRON (Testnet)
 
-### Hesap Index'i
+---
 
-Her blockchain için birden fazla hesap oluşturabilirsiniz:
+## 📡 API Endpoints
 
-```javascript
-// İlk Ethereum hesabı (index: 0)
-await wallet.createAccount('ethereum', 0);
+### Cüzdan
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| POST | `/api/wallet/generate` | Yeni cüzdan oluştur |
+| POST | `/api/wallet/import` | Mevcut cüzdan yükle |
+| POST | `/api/wallet/account` | Hesap oluştur |
+| GET | `/api/wallet/balance/:sessionId/:accountId` | Bakiye sorgula |
+| POST | `/api/wallet/send` | Transfer gönder |
 
-// İkinci Ethereum hesabı (index: 1)
-await wallet.createAccount('ethereum', 1);
+### Güvenlik
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| POST | `/api/security/pre-sign` | İşlem öncesi güvenlik kontrolü |
+| POST | `/api/security/email/register` | E-posta kaydet |
+| POST | `/api/security/email/verify` | Doğrulama kodu kontrol |
+| GET | `/api/security/profile/:sessionId` | Güvenlik profili |
 
-// Üçüncü Ethereum hesabı (index: 2)
-await wallet.createAccount('ethereum', 2);
-```
+---
 
-## API Referansı
+## 🌐 Deploy
 
-### `CryptoWallet` Sınıfı
+### Backend (Render.com)
+1. GitHub reposunu bağla
+2. **Root Directory:** `backend`
+3. **Build Command:** `npm install`
+4. **Start Command:** `node server.js`
+5. Environment variables ekle
+6. Disk ekle: `/data` (1GB)
 
-#### `async initialize()`
-WDK'yı başlatır ve yeni bir seed phrase oluşturur.
+### Frontend (Netlify)
+1. GitHub reposunu bağla
+2. **Base Directory:** `frontend`
+3. **Build Command:** `npm run build`
+4. **Publish Directory:** `frontend/dist`
+5. Environment variables ekle
 
-#### `async createAccount(blockchain, index = 0)`
-Belirtilen blockchain için yeni bir hesap oluşturur.
+---
 
-**Parametreler:**
-- `blockchain` (string): Blockchain adı ('ethereum', 'bitcoin', 'tron')
-- `index` (number): Hesap index'i (varsayılan: 0)
+## 🔒 Güvenlik Senaryosu
 
-**Döndürür:** `Promise<IWalletAccount>`
+### Hesap Ele Geçirildi
+Saldırgan seed phrase'i ele geçirdi ve hızlıca fonları boşaltmak istiyor:
 
-#### `async getBalance(blockchain, index = 0)`
-Hesap bakiyesini sorgular.
+1. ⚠️ Sistem 5 saniyede yapılan işlemi tespit eder
+2. ⚠️ Bilinmeyen adrese yüksek miktar transfer algılar
+3. 🔴 Risk skoru: 85/100
+4. 📧 E-posta doğrulaması zorunlu hale gelir
+5. ❌ Saldırgan, cüzdan sahibinin e-postasına erişemez
+6. ✅ Fonlar korunur!
 
-**Parametreler:**
-- `blockchain` (string): Blockchain adı
-- `index` (number): Hesap index'i (varsayılan: 0)
+---
 
-**Döndürür:** `Promise<string>` - Bakiye değeri
+## 📄 Lisans
 
-#### `async sendTransaction(blockchain, to, amount, index = 0)`
-İşlem gönderir.
+MIT License
 
-**Parametreler:**
-- `blockchain` (string): Blockchain adı
-- `to` (string): Alıcı adresi
-- `amount` (string|number): Gönderilecek miktar
-- `index` (number): Hesap index'i (varsayılan: 0)
+---
 
-**Döndürür:** `Promise<{hash: string, fee?: string}>`
+## 👥 Katkıda Bulunanlar
 
-#### `async listAccounts()`
-Tüm oluşturulan hesapları listeler.
+- Tether WDK Team
+- Google Gemini AI
 
-#### `static validateSeedPhrase(seedPhrase)`
-Seed phrase'in geçerli olup olmadığını kontrol eder.
+---
 
-**Parametreler:**
-- `seedPhrase` (string): Doğrulanacak seed phrase
-
-**Döndürür:** `boolean`
-
-## Güvenlik Uyarıları
-
-⚠️ **ÖNEMLİ**: 
-- Seed phrase'inizi **asla paylaşmayın**
-- Seed phrase'inizi **güvenli bir yerde saklayın** (şifre yöneticisi, güvenli not defteri)
-- Üretim ortamında seed phrase'i **güvenli bir şekilde yönetin**
-- Seed phrase'inizi **yedekleyin** - kaybederseniz cüzdanınıza erişemezsiniz
-- Testnet kullanırken bile gerçek seed phrase kullanmayın
-
-## WDK Dokümantasyonu
-
-Daha fazla bilgi ve gelişmiş özellikler için [WDK Resmi Dokümantasyonu](https://docs.wallet.tether.io/sdk) sayfasını ziyaret edin.
-
-## Örnek Senaryolar
-
-### Senaryo 1: Yeni Cüzdan Oluşturma
-
-```javascript
-const wallet = new CryptoWallet();
-await wallet.initialize(); // Yeni seed phrase oluşturulur
-await wallet.createAccount('ethereum', 0);
-await wallet.createAccount('bitcoin', 0);
-```
-
-### Senaryo 2: Mevcut Cüzdanı Yükleme
-
-```javascript
-const wallet = new CryptoWallet();
-wallet.seedPhrase = 'mevcut seed phrase buraya';
-wallet.wdk = new WDK(wallet.seedPhrase);
-wallet.registerWalletModules();
-await wallet.createAccount('ethereum', 0);
-```
-
-### Senaryo 3: Çoklu Hesap Yönetimi
-
-```javascript
-const wallet = new CryptoWallet();
-await wallet.initialize();
-
-// Farklı blockchain'ler için hesaplar
-await wallet.createAccount('ethereum', 0);
-await wallet.createAccount('bitcoin', 0);
-await wallet.createAccount('tron', 0);
-
-// Aynı blockchain için birden fazla hesap
-await wallet.createAccount('ethereum', 1);
-await wallet.createAccount('ethereum', 2);
-
-// Tüm hesapları listele
-await wallet.listAccounts();
-```
-
-## Lisans
-
-MIT
-
+**🛡️ Anahtarlarınız sizde, güvenliğiniz yapay zekada.**
