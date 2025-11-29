@@ -28,11 +28,25 @@ const BLOCKCHAIN_CONFIG = {
 }
 
 // LocalStorage helpers
-const saveSession = (sessionId, seedPhrase) => {
+const saveSession = (sessionId, seedPhrase, email = null) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ sessionId, seedPhrase }))
+    const data = { sessionId, seedPhrase }
+    if (email) data.email = email
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
   } catch (e) {
     console.error('Failed to save session:', e)
+  }
+}
+
+const saveSessionEmail = (email) => {
+  try {
+    const data = loadSession()
+    if (data) {
+      data.email = email
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+    }
+  } catch (e) {
+    console.error('Failed to save email:', e)
   }
 }
 
@@ -159,7 +173,26 @@ export function WalletProvider({ children }) {
             setIsInitialized(true)
             setCurrentPage('dashboard')
             
-            saveSession(data.sessionId, data.seedPhrase)
+            // E-postayı da yeni session'a kaydet
+            if (saved.email) {
+              try {
+                await fetch(`${API_URL}/security/email/register`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    sessionId: data.sessionId, 
+                    email: saved.email 
+                  })
+                })
+                console.log('📧 Email restored for new session:', saved.email)
+                saveSession(data.sessionId, data.seedPhrase, saved.email)
+              } catch (emailErr) {
+                console.error('Failed to restore email:', emailErr)
+                saveSession(data.sessionId, data.seedPhrase)
+              }
+            } else {
+              saveSession(data.sessionId, data.seedPhrase)
+            }
             
             // Restore accounts for this wallet
             const savedAccounts = getWalletAccounts(data.seedPhrase)
@@ -207,7 +240,7 @@ export function WalletProvider({ children }) {
     restoreSession()
   }, [])
 
-  const initialize = useCallback(async (existingSeed = null, email = null) => {
+  const initialize = useCallback(async (existingSeed = null) => {
     setIsLoading(true)
     setError(null)
     
@@ -227,29 +260,6 @@ export function WalletProvider({ children }) {
         throw new Error(data.error || 'Wallet initialization failed')
       }
       
-      // 📧 E-postayı kaydet (varsa)
-      if (email && data.sessionId) {
-        try {
-          console.log('📧 Registering email for session:', data.sessionId, email.trim())
-          const emailResponse = await fetch(`${API_URL}/security/email/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sessionId: data.sessionId, 
-              email: email.trim() 
-            })
-          })
-          const emailResult = await emailResponse.json()
-          console.log('📧 Email registration result:', emailResult)
-          
-          if (!emailResult.success) {
-            console.error('❌ Email registration failed:', emailResult.error)
-          }
-        } catch (emailErr) {
-          console.error('❌ Email registration error:', emailErr)
-        }
-      }
-      
       setSessionId(data.sessionId)
       setSeedPhrase(data.seedPhrase)
       setIsInitialized(true)
@@ -262,6 +272,7 @@ export function WalletProvider({ children }) {
       const updatedHistory = saveWalletToHistory(data.seedPhrase)
       setWalletsHistory(updatedHistory)
       
+      console.log('✅ Wallet initialized, sessionId:', data.sessionId)
       return data.sessionId // sessionId döndür
     } catch (err) {
       setError(err.message)

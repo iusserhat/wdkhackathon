@@ -54,13 +54,43 @@ export default function Welcome() {
     }
     
     try {
-      // Cüzdan oluştur (e-posta initialize içinde kaydedilir)
       console.log('📧 Creating wallet with email:', email.trim())
       
+      // Cüzdan oluştur
+      let newSessionId
       if (pendingAction === 'import') {
-        await initialize(importSeed.trim(), email.trim())
+        newSessionId = await initialize(importSeed.trim())
       } else {
-        await initialize(null, email.trim())
+        newSessionId = await initialize()
+      }
+      
+      console.log('📧 Wallet created, sessionId:', newSessionId)
+      
+      // E-postayı ayrıca kaydet (kesin çalışması için)
+      if (newSessionId) {
+        try {
+          const emailRes = await fetch(`${API_BASE}/api/security/email/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              sessionId: newSessionId, 
+              email: email.trim() 
+            })
+          })
+          const emailResult = await emailRes.json()
+          console.log('📧 Email registration result:', emailResult)
+          
+          // E-postayı localStorage'a da kaydet (session restore için)
+          const sessionData = localStorage.getItem('wdk_wallet_session')
+          if (sessionData) {
+            const parsed = JSON.parse(sessionData)
+            parsed.email = email.trim()
+            localStorage.setItem('wdk_wallet_session', JSON.stringify(parsed))
+            console.log('📧 Email saved to localStorage')
+          }
+        } catch (emailErr) {
+          console.error('❌ Email registration error:', emailErr)
+        }
       }
       
       console.log('✅ Wallet created with email')

@@ -2328,9 +2328,16 @@ app.post('/api/security/email/register', (req, res) => {
       return res.status(400).json({ success: false, error: 'Geçersiz e-posta adresi' });
     }
     
-    // SQLite'a kaydet
+    // Session'a kaydet
     db.getOrCreateProfile(sessionId);
     db.updateUserEmail(sessionId, email);
+    
+    // 🔐 Cüzdan hash'i ile de kaydet (kalıcı eşleme)
+    if (session.seedPhrase) {
+      const crypto = require('crypto');
+      const walletHash = crypto.createHash('sha256').update(session.seedPhrase).digest('hex');
+      db.registerWalletEmail(walletHash, email);
+    }
     
     console.log(`📧 Email registered for ${sessionId}: ${email}`);
     
@@ -2534,8 +2541,22 @@ app.post('/api/security/pre-sign', async (req, res) => {
     
     // E-posta doğrulama gerekiyor mu?
     if (aiAnalysis.requiresVerification) {
-      // E-posta kayıtlı mı?
-      const userEmail = db.getUserEmail(sessionId);
+      // E-posta kayıtlı mı? (Önce session'dan, sonra wallet hash'ten ara)
+      let userEmail = db.getUserEmail(sessionId);
+      
+      // Session'da yoksa wallet hash ile ara
+      if (!userEmail && session.seedPhrase) {
+        const crypto = require('crypto');
+        const walletHash = crypto.createHash('sha256').update(session.seedPhrase).digest('hex');
+        userEmail = db.getWalletEmail(walletHash);
+        
+        // Bulunduysa session'a da kaydet
+        if (userEmail) {
+          db.getOrCreateProfile(sessionId);
+          db.updateUserEmail(sessionId, userEmail);
+          console.log(`📧 Email restored from wallet hash: ${userEmail}`);
+        }
+      }
       
       if (!userEmail) {
         // ❌ E-posta kayıtlı değil - kayıt istenmeli

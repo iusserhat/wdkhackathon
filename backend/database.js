@@ -70,6 +70,13 @@ db.exec(`
     verified INTEGER DEFAULT 0
   );
 
+  -- Cüzdan-E-posta Eşlemesi (Kalıcı)
+  CREATE TABLE IF NOT EXISTS wallet_emails (
+    wallet_hash TEXT PRIMARY KEY,
+    email TEXT NOT NULL,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  );
+
   -- İndeksler
   CREATE INDEX IF NOT EXISTS idx_tx_session ON transaction_history(session_id);
   CREATE INDEX IF NOT EXISTS idx_tx_timestamp ON transaction_history(timestamp);
@@ -111,6 +118,23 @@ export function updateUserEmail(sessionId, email) {
 export function getUserEmail(sessionId) {
   const profile = db.prepare('SELECT email FROM user_profiles WHERE session_id = ?').get(sessionId);
   return profile?.email || null;
+}
+
+// ============================================
+// CÜZDAN-EPOSTA EŞLEMESİ (KALICI)
+// ============================================
+
+export function registerWalletEmail(walletHash, email) {
+  db.prepare(`
+    INSERT OR REPLACE INTO wallet_emails (wallet_hash, email, created_at)
+    VALUES (?, ?, CURRENT_TIMESTAMP)
+  `).run(walletHash, email);
+  console.log(`📧 Wallet email registered: ${walletHash.slice(0, 8)}... → ${email}`);
+}
+
+export function getWalletEmail(walletHash) {
+  const result = db.prepare('SELECT email FROM wallet_emails WHERE wallet_hash = ?').get(walletHash);
+  return result?.email || null;
 }
 
 export function updateAverageDuration(sessionId, newAverage) {
