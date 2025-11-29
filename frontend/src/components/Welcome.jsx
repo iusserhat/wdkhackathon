@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Key, ArrowRight, Shield, Zap, Globe, Loader2, AlertCircle, FolderOpen } from 'lucide-react'
+import { Sparkles, Key, ArrowRight, Shield, Zap, Globe, Loader2, AlertCircle, FolderOpen, Mail } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import styles from './Welcome.module.css'
+
+const API_BASE = 'http://localhost:3001'
 
 export default function Welcome() {
   const { 
@@ -14,10 +16,60 @@ export default function Welcome() {
     goToWallets
   } = useWallet()
   
-  const [mode, setMode] = useState('select') // select, import
+  const [mode, setMode] = useState('select') // select, email, import
   const [importSeed, setImportSeed] = useState('')
   const [importError, setImportError] = useState('')
   const [createError, setCreateError] = useState('')
+  
+  // 📧 E-posta state
+  const [email, setEmail] = useState('')
+  const [emailError, setEmailError] = useState('')
+  const [pendingAction, setPendingAction] = useState(null) // 'create' or 'import'
+
+  // E-posta validasyonu
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  // 📧 E-posta ekranına git
+  const handleCreateClick = () => {
+    setPendingAction('create')
+    setMode('email')
+    setEmailError('')
+  }
+
+  // 📧 E-posta ile cüzdan oluştur
+  const handleEmailSubmit = async () => {
+    setEmailError('')
+    
+    if (!email.trim()) {
+      setEmailError('Lütfen e-posta adresinizi girin')
+      return
+    }
+    
+    if (!isValidEmail(email.trim())) {
+      setEmailError('Geçerli bir e-posta adresi girin')
+      return
+    }
+    
+    try {
+      // Cüzdan oluştur (e-posta initialize içinde kaydedilir)
+      console.log('📧 Creating wallet with email:', email.trim())
+      
+      if (pendingAction === 'import') {
+        await initialize(importSeed.trim(), email.trim())
+      } else {
+        await initialize(null, email.trim())
+      }
+      
+      console.log('✅ Wallet created with email')
+      
+    } catch (err) {
+      console.error('Wallet creation error:', err)
+      setEmailError(err.message || 'Cüzdan oluşturulamadı')
+    }
+  }
 
   const handleCreate = async () => {
     setCreateError('')
@@ -42,12 +94,10 @@ export default function Welcome() {
       return
     }
     
-    try {
-      await initialize(importSeed.trim())
-    } catch (err) {
-      console.error('Import wallet error:', err)
-      setImportError(err.message || 'Cüzdan içe aktarılamadı')
-    }
+    // E-posta ekranına git
+    setPendingAction('import')
+    setMode('email')
+    setEmailError('')
   }
 
   const features = [
@@ -135,7 +185,7 @@ export default function Welcome() {
 
                 <motion.button
                   className={styles.primaryBtn}
-                  onClick={handleCreate}
+                  onClick={handleCreateClick}
                   disabled={isLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -237,7 +287,77 @@ export default function Welcome() {
                       <Loader2 className={styles.spinner} size={20} />
                     ) : (
                       <>
-                        <span>İçe Aktar</span>
+                        <span>Devam Et</span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* 📧 E-posta Kayıt Ekranı */}
+            {mode === 'email' && (
+              <motion.div
+                key="email"
+                className={styles.importMode}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+              >
+                <div className={styles.emailHeader}>
+                  <Mail size={32} className={styles.emailIcon} />
+                  <h3>Güvenlik E-postası</h3>
+                </div>
+                <p>Riskli işlemlerde doğrulama kodu bu adrese gönderilecek</p>
+                
+                <input
+                  type="email"
+                  className={styles.emailInput}
+                  placeholder="ornek@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                
+                {emailError && (
+                  <motion.p 
+                    className={styles.error}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    {emailError}
+                  </motion.p>
+                )}
+
+                <div className={styles.emailNote}>
+                  <Shield size={14} />
+                  <span>E-postanız güvenli bir şekilde saklanır ve sadece güvenlik doğrulaması için kullanılır.</span>
+                </div>
+
+                <div className={styles.importActions}>
+                  <button 
+                    className={styles.backBtn}
+                    onClick={() => {
+                      setMode(pendingAction === 'import' ? 'import' : 'select')
+                      setEmail('')
+                      setEmailError('')
+                    }}
+                  >
+                    Geri
+                  </button>
+                  
+                  <motion.button
+                    className={styles.primaryBtn}
+                    onClick={handleEmailSubmit}
+                    disabled={isLoading}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {isLoading ? (
+                      <Loader2 className={styles.spinner} size={20} />
+                    ) : (
+                      <>
+                        <span>Cüzdan Oluştur</span>
                         <ArrowRight size={18} />
                       </>
                     )}

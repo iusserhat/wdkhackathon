@@ -727,3 +727,57 @@
   }
 }
 
+/* 📧 E-posta Kayıt Ekranı */
+.emailHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.emailIcon {
+  color: var(--accent-cyan);
+}
+
+.emailInput {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  margin: 16px 0;
+}
+
+.emailInput:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  background: rgba(0, 245, 255, 0.05);
+  box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.1);
+}
+
+.emailInput::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.emailNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(0, 245, 255, 0.05);
+  border: 1px solid rgba(0, 245, 255, 0.1);
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 20px;
+}
+
+.emailNote svg {
+  color: var(--accent-cyan);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+

@@ -207,7 +207,7 @@ export function WalletProvider({ children }) {
     restoreSession()
   }, [])
 
-  const initialize = useCallback(async (existingSeed = null) => {
+  const initialize = useCallback(async (existingSeed = null, email = null) => {
     setIsLoading(true)
     setError(null)
     
@@ -227,6 +227,29 @@ export function WalletProvider({ children }) {
         throw new Error(data.error || 'Wallet initialization failed')
       }
       
+      // 📧 E-postayı kaydet (varsa)
+      if (email && data.sessionId) {
+        try {
+          console.log('📧 Registering email for session:', data.sessionId, email.trim())
+          const emailResponse = await fetch(`${API_URL}/security/email/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              sessionId: data.sessionId, 
+              email: email.trim() 
+            })
+          })
+          const emailResult = await emailResponse.json()
+          console.log('📧 Email registration result:', emailResult)
+          
+          if (!emailResult.success) {
+            console.error('❌ Email registration failed:', emailResult.error)
+          }
+        } catch (emailErr) {
+          console.error('❌ Email registration error:', emailErr)
+        }
+      }
+      
       setSessionId(data.sessionId)
       setSeedPhrase(data.seedPhrase)
       setIsInitialized(true)
@@ -239,7 +262,7 @@ export function WalletProvider({ children }) {
       const updatedHistory = saveWalletToHistory(data.seedPhrase)
       setWalletsHistory(updatedHistory)
       
-      return data.seedPhrase
+      return data.sessionId // sessionId döndür
     } catch (err) {
       setError(err.message)
       throw err

@@ -377,7 +377,7 @@ export default function TransactionModal({ account, onClose }) {
             </motion.div>
           )}
 
-          {/* 📧 E-posta Kayıt Ekranı */}
+          {/* 📧 E-posta Kayıtlı Değil Uyarısı */}
           {status === 'email_register' && (
             <motion.div
               key="email_register"
@@ -395,13 +395,15 @@ export default function TransactionModal({ account, onClose }) {
                 <AlertTriangle size={50} className={styles.warningIcon} />
               </motion.div>
               
-              <h3>⏱️ Hızlı İşlem Algılandı</h3>
-              <p className={styles.warningText}>{securityWarning}</p>
+              <h3>🔒 Güvenlik E-postası Gerekli</h3>
+              <p className={styles.warningText}>
+                Riskli bir işlem tespit edildi ancak cüzdanınıza kayıtlı bir güvenlik e-postası bulunamadı.
+              </p>
 
               <div className={styles.verificationBox}>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '16px' }}>
-                  Güvenlik için e-posta adresinizi kaydetmeniz gerekiyor.
-                  İşlemi onaylamak için size bir doğrulama kodu göndereceğiz.
+                  Güvenliğiniz için lütfen önce bir güvenlik e-postası kaydedin.
+                  E-posta kaydettikten sonra riskli işlemlerde size doğrulama kodu gönderilecek.
                 </p>
 
                 <div className={styles.emailInputWrapper}>
