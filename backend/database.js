@@ -5,17 +5,26 @@
 
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database dosyası (production'da /data klasörüne, development'ta local)
-const dbPath = process.env.NODE_ENV === 'production' 
-  ? '/data/security.db'
-  : path.join(__dirname, 'security.db');
+// Database dosyası - her zaman local klasör kullan
+// (Render free/starter tier'da güvenilir çalışır)
+const dbPath = path.join(__dirname, 'security.db');
 
 console.log(`📁 Database path: ${dbPath}`);
+console.log(`📁 __dirname: ${__dirname}`);
+
+// Klasörün var olduğundan emin ol
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+  console.log(`📁 Created directory: ${dbDir}`);
+}
+
 const db = new Database(dbPath);
 
 // WAL mode for better performance
