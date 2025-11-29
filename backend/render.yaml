@@ -1,0 +1,32 @@
+# Render.com Blueprint
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: wdk-wallet-api
+    runtime: node
+    region: frankfurt # Türkiye'ye yakın
+    plan: free # veya starter
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: GEMINI_API_KEY
+        sync: false # Render dashboard'dan manuel gir
+      - key: EMAILJS_SERVICE_ID
+        sync: false
+      - key: EMAILJS_TEMPLATE_ID
+        sync: false
+      - key: EMAILJS_PUBLIC_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false # Netlify URL'ini gir
+    disk:
+      name: wdk-data
+      mountPath: /data
+      sizeGB: 1
+

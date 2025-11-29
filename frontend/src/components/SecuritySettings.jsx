@@ -9,9 +9,8 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Shield, Mail, Clock, Activity, CheckCircle2, AlertCircle } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
+import { API_BASE } from '../config/api'
 import styles from './SecuritySettings.module.css'
-
-const API_BASE = 'http://localhost:3001'
 
 export default function SecuritySettings({ onClose }) {
   const { sessionId } = useWallet()

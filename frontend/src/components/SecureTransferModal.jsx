@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSecurityTiming, useInteractionListener } from '../hooks/useSecurityTiming';
+import { API_URL } from '../config/api';
 
 function SecureTransferModal({ 
   isOpen, 
@@ -138,7 +139,7 @@ function SecureTransferModal({
   // Gerçek transfer işlemi
   const executeTransfer = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/wallet/send', {
+      const response = await fetch(`${API_URL}/wallet/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

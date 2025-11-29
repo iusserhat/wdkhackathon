@@ -10,8 +10,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database dosyası
-const db = new Database(path.join(__dirname, 'security.db'));
+// Database dosyası (production'da /data klasörüne, development'ta local)
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/data/security.db'
+  : path.join(__dirname, 'security.db');
+
+console.log(`📁 Database path: ${dbPath}`);
+const db = new Database(dbPath);
 
 // WAL mode for better performance
 db.pragma('journal_mode = WAL');

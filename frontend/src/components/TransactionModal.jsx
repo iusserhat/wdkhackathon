@@ -3,9 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Loader2, CheckCircle2, XCircle, ExternalLink, Shield, Clock, Mail, AlertTriangle } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
 import { useSecurityTiming, useInteractionListener } from '../hooks/useSecurityTiming'
+import { API_BASE } from '../config/api'
 import styles from './TransactionModal.module.css'
-
-const API_BASE = 'http://localhost:3001'
 
 export default function TransactionModal({ account, onClose }) {
   const { sendTransaction, isLoading, sessionId } = useWallet()

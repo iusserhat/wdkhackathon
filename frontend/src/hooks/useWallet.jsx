@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import { API_URL } from '../config/api'
 
 const WalletContext = createContext(null)
-
-const API_URL = 'http://localhost:3001/api'
 const STORAGE_KEY = 'wdk_wallet_session'
 const WALLETS_HISTORY_KEY = 'wdk_wallets_history'
 

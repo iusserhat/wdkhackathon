@@ -6,9 +6,8 @@ import {
   PiggyBank, CreditCard, Info
 } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
+import { API_URL } from '../config/api'
 import styles from './Lending.module.css'
-
-const API_URL = 'http://localhost:3001/api'
 
 export default function Lending() {
   const { sessionId } = useWallet()

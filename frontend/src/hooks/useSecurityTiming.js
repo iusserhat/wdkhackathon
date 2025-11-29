@@ -12,8 +12,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import emailjs from '@emailjs/browser';
 import { EMAILJS_CONFIG } from '../config/emailjs';
-
-const API_BASE = 'http://localhost:3001';
+import { API_BASE } from '../config/api';
 
 // EmailJS başlat
 emailjs.init(EMAILJS_CONFIG.PUBLIC_KEY);

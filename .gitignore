@@ -1,9 +1,22 @@
 node_modules/
 .env
+.env.local
+.env.production.local
 *.log
 .DS_Store
 dist/
 build/
 coverage/
 .nyc_output/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
 

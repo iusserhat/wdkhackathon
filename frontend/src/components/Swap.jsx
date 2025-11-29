@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowDownUp, Loader2, ChevronDown, AlertCircle, Check, X, RefreshCw, Zap } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
+import { API_URL } from '../config/api'
 import styles from './Swap.module.css'
-
-const API_URL = 'http://localhost:3001/api'
 
 export default function Swap() {
   const { sessionId, accounts } = useWallet()

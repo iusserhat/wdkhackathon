@@ -2,9 +2,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Key, ArrowRight, Shield, Zap, Globe, Loader2, AlertCircle, FolderOpen, Mail } from 'lucide-react'
 import { useWallet } from '../hooks/useWallet'
+import { API_BASE } from '../config/api'
 import styles from './Welcome.module.css'
-
-const API_BASE = 'http://localhost:3001'
 
 export default function Welcome() {
   const { 
