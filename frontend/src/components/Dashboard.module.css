@@ -7,6 +7,56 @@
   margin: 0 auto;
 }
 
+/* Navigation Tabs */
+.tabsContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 6px;
+  overflow-x: auto;
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: transparent;
+  border: none;
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabBtn.active {
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(168, 85, 247, 0.15));
+  color: var(--accent-cyan);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.1);
+}
+
+.newBadge {
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, #00f5ff, #a855f7);
+  color: #0a0a1a;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* Seed Section */
 .seedSection {
   background: var(--bg-card);
