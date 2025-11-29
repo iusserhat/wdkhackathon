@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Çevrimdışı - WDK Wallet</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: #fff;
+    }
+    
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    
+    .icon {
+      font-size: 64px;
+      margin-bottom: 24px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    p {
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+    }
+    
+    .retry-btn:active {
+      transform: translateY(0);
+    }
+    
+    .status {
+      margin-top: 40px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .status-title {
+      font-size: 0.8rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    
+    .status-text {
+      color: #f59e0b;
+      font-weight: 500;
+    }
+    
+    .features {
+      margin-top: 32px;
+      text-align: left;
+    }
+    
+    .features h3 {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    
+    .features ul {
+      list-style: none;
+    }
+    
+    .features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    
+    .features li::before {
+      content: '✓';
+      color: #22c55e;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">📡</div>
+    <h1>Çevrimdışısınız</h1>
+    <p>İnternet bağlantınız kesilmiş görünüyor. Bağlantınızı kontrol edip tekrar deneyin.</p>
+    
+    <button class="retry-btn" onclick="location.reload()">
+      🔄 Tekrar Dene
+    </button>
+    
+    <div class="status">
+      <div class="status-title">Bağlantı Durumu</div>
+      <div class="status-text" id="status">Çevrimdışı</div>
+    </div>
+    
+    <div class="features">
+      <h3>Çevrimdışı kullanılabilir özellikler:</h3>
+      <ul>
+        <li>Cüzdan adreslerinizi görüntüleme</li>
+        <li>İşlem geçmişinizi inceleme (önbellekte)</li>
+        <li>Ayarlarınızı değiştirme</li>
+      </ul>
+    </div>
+  </div>
+  
+  <script>
+    // Check connection status
+    function updateStatus() {
+      const statusEl = document.getElementById('status');
+      if (navigator.onLine) {
+        statusEl.textContent = 'Bağlantı sağlandı!';
+        statusEl.style.color = '#22c55e';
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        statusEl.textContent = 'Çevrimdışı';
+        statusEl.style.color = '#f59e0b';
+      }
+    }
+    
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+  </script>
+</body>
+</html>
+

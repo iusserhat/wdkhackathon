@@ -3,6 +3,7 @@ import Header from './components/Header'
 import Welcome from './components/Welcome'
 import MyWallets from './components/MyWallets'
 import Dashboard from './components/Dashboard'
+import PWAInstallButton from './components/PWAInstallButton'
 import { motion } from 'framer-motion'
 
 function LoadingScreen() {
@@ -62,6 +63,7 @@ function WalletApp() {
     <div className="app">
       <Header />
       {renderPage()}
+      <PWAInstallButton />
     </div>
   )
 }

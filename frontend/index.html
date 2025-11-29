@@ -2,14 +2,123 @@
 <html lang="tr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💎</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="WDK Tether Wallet SDK ile oluşturulmuş kripto cüzdan uygulaması" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="WDK Crypto Wallet - Güvenli, çoklu zincir destekli kripto cüzdanı" />
     <meta name="theme-color" content="#0a0a0f" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="WDK Wallet" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="WDK Wallet" />
+    <meta name="msapplication-TileColor" content="#0a0a0f" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/icons/icon.svg" color="#22c55e" />
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
     <title>WDK Crypto Wallet</title>
+    
+    <!-- Splash screens for iOS -->
+    <style>
+      /* Prevent flash of unstyled content */
+      html {
+        background-color: #0a0a0f;
+      }
+      
+      /* Loading spinner for PWA */
+      #pwa-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #0a0a0f;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.3s ease;
+      }
+      
+      #pwa-loading.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      #pwa-loading .spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(34, 197, 94, 0.2);
+        border-top-color: #22c55e;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      #pwa-loading .logo {
+        font-size: 48px;
+        margin-bottom: 20px;
+      }
+      
+      #pwa-loading .text {
+        color: #888;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 14px;
+        margin-top: 15px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
+    <!-- PWA Loading Screen -->
+    <div id="pwa-loading">
+      <div class="logo">🛡️</div>
+      <div class="spinner"></div>
+      <div class="text">WDK Wallet yükleniyor...</div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <script>
+      // Hide loading screen when app is ready
+      window.addEventListener('load', () => {
+        const loader = document.getElementById('pwa-loading');
+        if (loader) {
+          setTimeout(() => {
+            loader.classList.add('hidden');
+            setTimeout(() => loader.remove(), 300);
+          }, 500);
+        }
+      });
+      
+      // PWA Install prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        window.pwaInstallPrompt = deferredPrompt;
+        window.dispatchEvent(new CustomEvent('pwa-install-available'));
+      });
+      
+      // Track if app is installed
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        window.pwaInstallPrompt = null;
+        console.log('✅ PWA installed successfully!');
+      });
+    </script>
   </body>
 </html>

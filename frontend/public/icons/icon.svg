@@ -1,0 +1,47 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e"/>
+      <stop offset="50%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)"/>
+  
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="180" stroke="url(#accentGrad)" stroke-width="8" fill="none" opacity="0.3"/>
+  
+  <!-- Shield shape -->
+  <path d="M256 80 L400 140 L400 280 Q400 380 256 440 Q112 380 112 280 L112 140 Z" 
+        fill="url(#accentGrad)" opacity="0.15"/>
+  <path d="M256 80 L400 140 L400 280 Q400 380 256 440 Q112 380 112 280 L112 140 Z" 
+        stroke="url(#accentGrad)" stroke-width="4" fill="none" filter="url(#glow)"/>
+  
+  <!-- W letter -->
+  <text x="256" y="300" 
+        font-family="system-ui, -apple-system, sans-serif" 
+        font-size="180" 
+        font-weight="800" 
+        fill="url(#accentGrad)" 
+        text-anchor="middle" 
+        filter="url(#glow)">W</text>
+  
+  <!-- Lock icon at bottom -->
+  <rect x="232" y="350" width="48" height="36" rx="4" fill="#22c55e"/>
+  <rect x="244" y="338" width="24" height="20" rx="10" stroke="#22c55e" stroke-width="4" fill="none"/>
+  <circle cx="256" cy="366" r="6" fill="#0a0a0f"/>
+</svg>
+
