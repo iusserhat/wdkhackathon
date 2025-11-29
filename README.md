@@ -8,32 +8,23 @@ Tether WDK (Wallet Development Kit) altyapısı üzerine inşa edilmiş, **davra
 
 ## 📸 Ekran Görüntüleri
 
-### Cüzdan Oluşturma
-![Cüzdan Oluşturma](frontend/public/1.jpeg)
+<p align="center">
+  <img src="frontend/public/1.jpeg" width="250" alt="Cüzdan Oluşturma"/>
+  <img src="frontend/public/2.jpeg" width="250" alt="Dashboard"/>
+  <img src="frontend/public/3.jpeg" width="250" alt="Hesap Detayları"/>
+</p>
 
-### Ana Dashboard
-![Dashboard](frontend/public/2.jpeg)
+<p align="center">
+  <img src="frontend/public/4.jpeg" width="250" alt="Transfer"/>
+  <img src="frontend/public/5.jpeg" width="250" alt="Güvenlik Uyarısı"/>
+  <img src="frontend/public/6.jpeg" width="250" alt="E-posta Doğrulaması"/>
+</p>
 
-### Hesap Detayları
-![Hesap Detayları](frontend/public/3.jpeg)
-
-### Transfer İşlemi
-![Transfer](frontend/public/4.jpeg)
-
-### Güvenlik Uyarısı
-![Güvenlik Uyarısı](frontend/public/5.jpeg)
-
-### E-posta Doğrulaması
-![E-posta Doğrulaması](frontend/public/6.jpeg)
-
-### Risk Analizi
-![Risk Analizi](frontend/public/7.jpeg)
-
-### İşlem Onayı
-![İşlem Onayı](frontend/public/8.jpeg)
-
-### Başarılı İşlem
-![Başarılı İşlem](frontend/public/9.jpeg)
+<p align="center">
+  <img src="frontend/public/7.jpeg" width="250" alt="Risk Analizi"/>
+  <img src="frontend/public/8.jpeg" width="250" alt="İşlem Onayı"/>
+  <img src="frontend/public/9.jpeg" width="250" alt="Başarılı İşlem"/>
+</p>
 
 ---
 
@@ -123,63 +114,18 @@ VITE_EMAILJS_PUBLIC_KEY=your_public_key
 
 ## 🏗️ Teknik Altyapı
 
-### Frontend
-- **React 18** + Vite
-- **Framer Motion** - Animasyonlar
-- **Lucide Icons** - İkonlar
-- **CSS Modules** - Styling
+| Katman | Teknoloji |
+|--------|-----------|
+| **Frontend** | React 18, Vite, Framer Motion |
+| **Backend** | Node.js, Express, SQLite |
+| **AI** | Google Gemini |
+| **Blockchain** | Tether WDK SDK |
+| **E-posta** | EmailJS |
 
-### Backend
-- **Node.js** + Express
-- **SQLite** - Veritabanı
-- **Google Gemini AI** - Davranış analizi
-- **EmailJS** - E-posta servisi
-
-### Blockchain
-- **Tether WDK SDK**
+### Desteklenen Zincirler
 - Ethereum (Sepolia Testnet)
 - Bitcoin (Testnet)
 - TRON (Testnet)
-
----
-
-## 📡 API Endpoints
-
-### Cüzdan
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| POST | `/api/wallet/generate` | Yeni cüzdan oluştur |
-| POST | `/api/wallet/import` | Mevcut cüzdan yükle |
-| POST | `/api/wallet/account` | Hesap oluştur |
-| GET | `/api/wallet/balance/:sessionId/:accountId` | Bakiye sorgula |
-| POST | `/api/wallet/send` | Transfer gönder |
-
-### Güvenlik
-| Method | Endpoint | Açıklama |
-|--------|----------|----------|
-| POST | `/api/security/pre-sign` | İşlem öncesi güvenlik kontrolü |
-| POST | `/api/security/email/register` | E-posta kaydet |
-| POST | `/api/security/email/verify` | Doğrulama kodu kontrol |
-| GET | `/api/security/profile/:sessionId` | Güvenlik profili |
-
----
-
-## 🌐 Deploy
-
-### Backend (Render.com)
-1. GitHub reposunu bağla
-2. **Root Directory:** `backend`
-3. **Build Command:** `npm install`
-4. **Start Command:** `node server.js`
-5. Environment variables ekle
-6. Disk ekle: `/data` (1GB)
-
-### Frontend (Netlify)
-1. GitHub reposunu bağla
-2. **Base Directory:** `frontend`
-3. **Build Command:** `npm run build`
-4. **Publish Directory:** `frontend/dist`
-5. Environment variables ekle
 
 ---
 
@@ -197,16 +143,18 @@ Saldırgan seed phrase'i ele geçirdi ve hızlıca fonları boşaltmak istiyor:
 
 ---
 
-## 📄 Lisans
+## 🌐 Deploy
 
-MIT License
+| Platform | Klasör | Komut |
+|----------|--------|-------|
+| **Render.com** | backend | `node server.js` |
+| **Netlify** | frontend | `npm run build` |
 
 ---
 
-## 👥 Katkıda Bulunanlar
+## 📄 Lisans
 
-- Tether WDK Team
-- Google Gemini AI
+MIT License
 
 ---
 
