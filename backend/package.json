@@ -1,0 +1,22 @@
+{
+  "name": "wdk-wallet-backend",
+  "version": "1.0.0",
+  "description": "WDK Tether Wallet Backend API",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["wdk", "wallet", "crypto", "api"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@tetherto/wdk": "^1.0.0-beta.4",
+    "@tetherto/wdk-wallet-btc": "^1.0.0-beta.3",
+    "@tetherto/wdk-wallet-evm": "^1.0.0-beta.4",
+    "@tetherto/wdk-wallet-tron": "^1.0.0-beta.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.0"
+  }
+}
