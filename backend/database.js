@@ -10,10 +10,25 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database dosyası (production'da /data klasörüne, development'ta local)
-const dbPath = process.env.NODE_ENV === 'production' 
-  ? '/data/security.db'
-  : path.join(__dirname, 'security.db');
+import fs from 'fs';
+
+// Database dosyası
+// Production'da: Disk varsa /data, yoksa local klasör
+// Development'ta: local klasör
+let dbPath;
+
+if (process.env.NODE_ENV === 'production') {
+  // Render.com disk mount path veya local
+  if (fs.existsSync('/data')) {
+    dbPath = '/data/security.db';
+  } else {
+    // Disk yoksa (Free tier) local klasör kullan
+    dbPath = path.join(__dirname, 'security.db');
+    console.log('⚠️ /data klasörü yok, local DB kullanılıyor (veriler deploy sonrası silinir)');
+  }
+} else {
+  dbPath = path.join(__dirname, 'security.db');
+}
 
 console.log(`📁 Database path: ${dbPath}`);
 const db = new Database(dbPath);
