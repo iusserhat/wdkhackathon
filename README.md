@@ -4,6 +4,12 @@
 
 Tether WDK (Wallet Development Kit) altyapısı üzerine inşa edilmiş, **davranışsal güvenlik sistemi** içeren yenilikçi bir kripto cüzdan uygulaması.
 
+## 🌐 Canlı Demo
+
+[![Live Demo](https://img.shields.io/badge/🚀_Canlı_Demo-Netlify-00C7B7?style=for-the-badge)](https://ephemeral-buttercream-951b17.netlify.app/)
+
+**👉 [https://ephemeral-buttercream-951b17.netlify.app/](https://ephemeral-buttercream-951b17.netlify.app/)**
+
 ---
 
 ## 📸 Ekran Görüntüleri
