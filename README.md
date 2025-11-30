@@ -7,8 +7,9 @@ Tether WDK (Wallet Development Kit) altyapısı üzerine inşa edilmiş, **davra
 ## 🌐 Canlı Demo
 
 [![Live Demo](https://img.shields.io/badge/🚀_Canlı_Demo-Netlify-00C7B7?style=for-the-badge)](https://ephemeral-buttercream-951b17.netlify.app/)
+[![Presentation](https://img.shields.io/badge/📊_Sunum-Google_Slides-FBBC04?style=for-the-badge)](https://docs.google.com/presentation/d/1S993p8G9Xgx8WqaJaRs7kQ0_9U8aKiug/edit?usp=sharing)
 
-**👉 [https://ephemeral-buttercream-951b17.netlify.app/](https://ephemeral-buttercream-951b17.netlify.app/)**
+**👉 [Canlı Demo](https://ephemeral-buttercream-951b17.netlify.app/)** | **📊 [Sunum](https://docs.google.com/presentation/d/1S993p8G9Xgx8WqaJaRs7kQ0_9U8aKiug/edit?usp=sharing)**
 
 ---
 
